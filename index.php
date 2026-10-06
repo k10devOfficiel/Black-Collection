@@ -28,7 +28,6 @@ $vetements  = array_filter($produits, fn($p) => $p['type'] === 'vetement');
 <section class="hero-section">
   <div class="hero-overlay"></div>
   <div class="container hero-content">
-    <span class="hero-badge"><i class="gold-dot">&bull;</i> ATELIER ABIDJAN</span>
     <h1 class="hero-title">L'Élégance a son côté sombre.</h1>
     <p class="hero-subtitle">Des sillages intenses, des accords rares et une allure d'exception conçus pour marquer les esprits.</p>
     <div class="hero-actions">
@@ -68,7 +67,7 @@ $vetements  = array_filter($produits, fn($p) => $p['type'] === 'vetement');
         <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
       </svg>
       <div>
-        <strong>Commande WhatsApp & Wave</strong>
+        <strong>Commande WhatsApp </strong>
         <span>Simplicité, flexibilité et écoute</span>
       </div>
     </div>

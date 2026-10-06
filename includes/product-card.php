@@ -74,6 +74,7 @@ $catClass = !empty($p['categorie_id']) ? 'cat-' . (int)$p['categorie_id'] : '';
       <?php else: ?>
         <button type="button" class="btn-card-add js-add-to-cart" 
                 data-id="<?= (int)$p['id'] ?>"
+                data-type="<?= e($p['type']) ?>"
                 data-nom="<?= e($p['nom']) ?>"
                 data-prix="<?= (int)$p['prix'] ?>"
                 data-photo="<?= !empty($p['photo']) ? e($p['photo']) : '' ?>"

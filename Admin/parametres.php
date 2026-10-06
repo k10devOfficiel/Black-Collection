@@ -103,9 +103,9 @@ admin_debut('Paramètres', 'parametres');
     </div>
 
     <div class="form-group">
-      <label class="form-label" for="livraison_minimum">Minimum de commande (articles)</label>
+      <label class="form-label" for="livraison_minimum">Minimum de commande (parfums uniquement)</label>
       <input type="number" id="livraison_minimum" name="livraison_minimum" class="form-control" value="<?= e($params['livraison_minimum']) ?>" min="1">
-      <div class="form-hint">Nombre minimum de parfums requis pour valider une commande.</div>
+      <div class="form-hint">Nombre minimum de flacons de parfum requis (les vêtements ne sont pas soumis à ce minimum).</div>
     </div>
 
     <div class="form-group">

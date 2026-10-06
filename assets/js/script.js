@@ -141,11 +141,14 @@
       });
     });
 
-    // Vérification du minimum requis
-    var minRequis = btnWhatsappOrder ? parseInt(btnWhatsappOrder.getAttribute('data-min'), 10) || 1 : 1;
+    // Vérification du minimum requis : concerne uniquement les parfums
+    var totalParfums = cart.filter(function (p) { return (p.type || 'parfum') === 'parfum'; })
+                           .reduce(function (acc, p) { return acc + p.qte; }, 0);
+    var minRequis = btnWhatsappOrder ? parseInt(btnWhatsappOrder.getAttribute('data-min'), 10) || 5 : 5;
+
     if (cartMinWarningEl) {
-      if (totalArticles < minRequis && totalArticles > 0) {
-        cartMinWarningEl.textContent = 'Encore ' + (minRequis - totalArticles) + ' article(s) pour atteindre le minimum requis de ' + minRequis + ' flacons.';
+      if (totalParfums > 0 && totalParfums < minRequis) {
+        cartMinWarningEl.textContent = 'Règle des ' + minRequis + ' flacons : encore ' + (minRequis - totalParfums) + ' parfum(s) pour atteindre le minimum requis de ' + minRequis + ' parfums (aucun minimum pour les vêtements).';
         cartMinWarningEl.style.display = 'block';
       } else {
         cartMinWarningEl.style.display = 'none';
@@ -162,11 +165,14 @@
         return;
       }
 
+      var totalParfums = cart.filter(function (p) { return (p.type || 'parfum') === 'parfum'; })
+                             .reduce(function (acc, p) { return acc + p.qte; }, 0);
       var totalArticles = cart.reduce(function (acc, p) { return acc + p.qte; }, 0);
-      var minRequis = parseInt(this.getAttribute('data-min'), 10) || 1;
+      var minRequis = parseInt(this.getAttribute('data-min'), 10) || 5;
 
-      if (totalArticles < minRequis) {
-        if (!confirm('Le minimum recommandé pour la livraison est de ' + minRequis + ' flacons (actuel: ' + totalArticles + '). Souhaitez-vous continuer quand même ?')) {
+      // La contrainte ne s'applique qu'aux parfums
+      if (totalParfums > 0 && totalParfums < minRequis) {
+        if (!confirm('Le minimum requis pour les parfums est de ' + minRequis + ' flacons (actuel : ' + totalParfums + ' parfum(s)). Les vêtements ne sont pas soumis à ce minimum.\n\nSouhaitez-vous continuer quand même ?')) {
           return;
         }
       }
@@ -179,10 +185,11 @@
 
       cart.forEach(function (it) {
         var format = it.contenance ? " (" + it.contenance + ")" : "";
-        texte += "• " + it.qte + "x " + it.nom + format + " — " + formatPrix(it.prix * it.qte) + "\n";
+        var typeLabel = it.type === 'vetement' ? ' [Vêtement]' : '';
+        texte += "• " + it.qte + "x " + it.nom + typeLabel + format + " — " + formatPrix(it.prix * it.qte) + "\n";
       });
 
-      texte += "\n📦 Total articles : " + totalArticles;
+      texte += "\n📦 Total articles : " + totalArticles + " (dont " + totalParfums + " parfum" + (totalParfums > 1 ? "s" : "") + ")";
       texte += "\n💰 Total commande : " + formatPrix(sousTotal);
       texte += "\n\n--- Coordonnées Client ---";
       texte += "\n👤 Nom & Prénoms : ";
@@ -200,6 +207,7 @@
     btn.addEventListener('click', function (e) {
       e.preventDefault();
       var id         = parseInt(this.getAttribute('data-id'), 10);
+      var type       = this.getAttribute('data-type') || 'parfum';
       var nom        = this.getAttribute('data-nom');
       var prix       = parseInt(this.getAttribute('data-prix'), 10);
       var photo      = this.getAttribute('data-photo');
@@ -207,6 +215,7 @@
 
       addToCart({
         id: id,
+        type: type,
         nom: nom,
         prix: prix,
         photo: photo,
@@ -244,6 +253,7 @@
   var closeModalBtn  = document.getElementById('closeModalBtn');
 
   function openModal(card) {
+    var type       = card.getAttribute('data-type') || 'parfum';
     var nom        = card.getAttribute('data-nom');
     var prix       = parseInt(card.getAttribute('data-prix'), 10);
     var contenance = card.getAttribute('data-contenance');
@@ -292,6 +302,7 @@
       addBtn.addEventListener('click', function () {
         addToCart({
           id: id,
+          type: type,
           nom: nom,
           prix: prix,
           photo: photo,

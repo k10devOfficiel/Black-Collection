@@ -30,10 +30,10 @@ $minCommande = (int) get_param('livraison_minimum', '5');
   <!-- Barre d'annonce supérieure -->
   <aside class="top-announcement" aria-label="Informations de commande">
     <div class="container announcement-content">
-      <span><strong class="gold-text">&bull;</strong> Livraison rapide à <?= e(get_param('livraison_zone', 'Abidjan')) ?></span>
-      <span>Minimum de commande : <strong><?= $minCommande ?> flacons</strong></span>
+      <span><strong class="gold-text"></strong> Livraison rapide à <?= e(get_param('livraison_zone', 'Abidjan')) ?></span>
+      <span>Minimum de commande : <strong><?= $minCommande ?> flacons de parfum</strong> (aucun minimum sur les vêtements)</span>
       <a href="https://wa.me/<?= e($whatsapp) ?>" target="_blank" rel="noopener" class="top-wa-link">
-        Commander via WhatsApp &rarr;
+        Commander via WhatsApp ;
       </a>
     </div>
   </aside>
