@@ -8,6 +8,7 @@ $nomMarque   = get_param('nom_marque', 'Black Collection');
 $slogan      = get_param('slogan', "L'élégance a son côté sombre.");
 $whatsapp    = get_param('whatsapp', '2250554971592');
 $minCommande = (int) get_param('livraison_minimum', '5');
+$logo        = get_param('logo');
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -16,25 +17,35 @@ $minCommande = (int) get_param('livraison_minimum', '5');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= e($nomMarque) ?> &mdash; <?= e($slogan) ?></title>
   <meta name="description" content="<?= e($nomMarque) ?> : Haute parfumerie et pièces exclusives. Commandez directement à Abidjan via WhatsApp.">
-
+    <?php
+  $schema  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+  $baseUrl = $schema . '://' . ($_SERVER['HTTP_HOST'] ?? '');
+  ?>
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="<?= e($nomMarque) ?> &mdash; <?= e($slogan) ?>">
+  <meta property="og:description" content="Haute parfumerie à Abidjan. Commandez via WhatsApp.">
+  <meta property="og:image" content="<?= e($baseUrl) ?>/assets/img/og-image.jpg">
   <!-- Polices Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Marcellus&display=swap">
 
   <!-- Feuilles de style -->
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=<?= (int) @filemtime(__DIR__ . '/../assets/css/style.css') ?>">
+  <link rel="stylesheet" href="assets/css/checkout.css?v=<?= (int) @filemtime(__DIR__ . '/../assets/css/checkout.css') ?>">
 </head>
 <body>
 
   <!-- Barre d'annonce supérieure -->
   <aside class="top-announcement" aria-label="Informations de commande">
     <div class="container announcement-content">
-      <span><strong class="gold-text"></strong> Livraison rapide à <?= e(get_param('livraison_zone', 'Abidjan')) ?></span>
-      <span>Minimum de commande : <strong><?= $minCommande ?> flacons de parfum</strong> (aucun minimum sur les vêtements)</span>
-      <a href="https://wa.me/<?= e($whatsapp) ?>" target="_blank" rel="noopener" class="top-wa-link">
-        Commander via WhatsApp ;
-      </a>
+      <span>Livraison à <?= e(get_param('livraison_zone', 'Abidjan')) ?></span>
+      <span>Minimum de commande : <strong><?= $minCommande ?></strong></span>
+    
     </div>
   </aside>
 
@@ -49,8 +60,12 @@ $minCommande = (int) get_param('livraison_minimum', '5');
 
       <!-- Logo de la marque -->
       <a href="index.php" class="site-logo">
-        <span class="logo-main"><?= e($nomMarque) ?></span>
-        <span class="logo-sub">HAUTE PARFUMERIE</span>
+        <?php if ($logo !== ''): ?>
+          <img class="logo-img" src="<?= e($logo) ?>" alt="<?= e($nomMarque) ?>">
+        <?php else: ?>
+          <span class="logo-main"><?= e($nomMarque) ?></span>
+          <span class="logo-sub">HAUTE PARFUMERIE</span>
+        <?php endif; ?>
       </a>
 
       <!-- Navigation principale -->

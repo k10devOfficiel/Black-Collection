@@ -880,3 +880,8 @@ body.modal-open .modal-card { transform: translateY(0); }
   .product-grid { grid-template-columns: 1fr; }
   .modal-grid { grid-template-columns: 1fr; }
 }
+
+/* Logo personnalisé (paramètres admin) */
+.logo-img { display: block; height: 54px; width: auto; max-width: 220px; object-fit: contain; }
+.footer-logo-img { display: block; height: 60px; width: auto; max-width: 240px; object-fit: contain; margin-bottom: 12px; }
+@media (max-width: 768px) { .logo-img { height: 44px; max-width: 170px; } }

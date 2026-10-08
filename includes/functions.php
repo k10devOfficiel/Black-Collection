@@ -60,12 +60,15 @@ function set_param(string $cle, ?string $valeur): bool
  */
 function slugify(string $texte): string
 {
-    $texte = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $texte) ?: strtolower($texte);
-    $texte = preg_replace('/[^a-z0-9]+/i', '-', $texte);
+    if (function_exists('transliterator_transliterate')) {
+        $texte = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $texte) ?: $texte;
+    } elseif (function_exists('iconv')) {
+        $texte = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texte) ?: $texte;
+    }
+    $texte = preg_replace('/[^a-z0-9]+/', '-', strtolower($texte));
     $texte = trim($texte, '-');
     return $texte ?: 'item-' . time();
 }
-
 /**
  * Redirige vers une URL et stoppe le script.
  */

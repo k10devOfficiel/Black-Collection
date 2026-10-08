@@ -13,7 +13,7 @@ $catClass = !empty($p['categorie_id']) ? 'cat-' . (int)$p['categorie_id'] : '';
          data-prix="<?= (int)$p['prix'] ?>"
          data-contenance="<?= e($p['contenance'] ?? '') ?>"
          data-photo="<?= !empty($p['photo']) ? e($p['photo']) : '' ?>"
-         data-notes="<?= e($p['notes_olfactives'] ?? '') ?>"
+         data-notes="<?= $p['type'] === 'parfum' ? e($p['notes_olfactives'] ?? '') : '' ?>"
          data-desc="<?= e($p['description'] ?? '') ?>"
          data-rupture="<?= $rupture ? '1' : '0' ?>">
   
@@ -43,7 +43,7 @@ $catClass = !empty($p['categorie_id']) ? 'cat-' . (int)$p['categorie_id'] : '';
     <!-- Actions au survol -->
     <div class="card-quick-actions">
       <button type="button" class="quick-view-btn js-quick-view" aria-label="Aperçu des détails">
-        Aperçu olfactif
+        <?= $p['type'] === 'vetement' ? 'Aperçu' : 'Aperçu olfactif' ?>
       </button>
     </div>
   </div>
@@ -58,7 +58,7 @@ $catClass = !empty($p['categorie_id']) ? 'cat-' . (int)$p['categorie_id'] : '';
 
     <h3 class="card-title"><?= e($p['nom']) ?></h3>
 
-    <?php if (!empty($p['notes_olfactives'])): ?>
+    <?php if ($p['type'] === 'parfum' && !empty($p['notes_olfactives'])): ?>
       <p class="card-notes" title="<?= e($p['notes_olfactives']) ?>">
         <?= e(mb_strimwidth($p['notes_olfactives'], 0, 48, '...')) ?>
       </p>

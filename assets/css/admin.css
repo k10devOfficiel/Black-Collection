@@ -330,3 +330,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   .row-prod .btn-sm { width: 100%; }
   .recherche input { width: 90px; }
 }
+
+/* Logo personnalisé (paramètres) */
+.brand-img { display: block; max-height: 46px; max-width: 170px; width: auto; object-fit: contain; }
+.auth-logo-img { display: block; max-height: 70px; max-width: 240px; width: auto; object-fit: contain; margin: 0 auto 12px; }

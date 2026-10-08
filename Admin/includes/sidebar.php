@@ -31,9 +31,12 @@ function admin_debut(string $titre, string $actif = ''): void
         'produits'   => ['produits.php',     'Produits',         'box'],
         'ajouter'    => ['produit-form.php', 'Ajouter un produit', 'plus'],
         'categories' => ['categories.php',   'Catégories',       'shapes'],
+        'commandes'  => ['commandes.php',    'Commandes',        'bag'],
+        'clients'    => ['clients.php',      'Clients',          'user'],
         'parametres' => ['parametres.php',   'Paramètres',       'settings'],
     ];
     $nom = $_SESSION['admin_nom'] ?? 'Admin';
+    $logo = get_param('logo');
     ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -55,8 +58,12 @@ function admin_debut(string $titre, string $actif = ''): void
   <div>
     <div class="side-head">
       <a class="brand" href="index.php">
-        <span class="brand-1">BLACK</span>
-        <span class="brand-2">COLLECTION</span>
+        <?php if ($logo !== ''): ?>
+          <img class="brand-img" src="../<?= e($logo) ?>" alt="Black Collection">
+        <?php else: ?>
+          <span class="brand-1">BLACK</span>
+          <span class="brand-2">COLLECTION</span>
+        <?php endif; ?>
       </a>
       <button type="button" class="icon-btn only-mobile" id="menu-close" aria-label="Fermer le menu"><?= icon('close') ?></button>
     </div>

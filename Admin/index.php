@@ -21,6 +21,27 @@ $parfums   = (int) $stats['parfums'];
 $vetements = (int) $stats['vetements'];
 $ruptures  = (int) $stats['ruptures'];
 
+/* ---------- Commandes & clients ---------- */
+$cmd = ['total' => 0, 'nouvelles' => 0, 'ca' => 0];
+$nbClients = 0;
+$dernieresCommandes = [];
+$libStatut = ['nouvelle' => 'Nouvelle', 'confirmee' => 'Confirmée', 'livree' => 'Livrée', 'annulee' => 'Annulée'];
+try {
+    $c = db()->query(
+        "SELECT COUNT(*) AS total,
+                COALESCE(SUM(statut = 'nouvelle'), 0) AS nouvelles,
+                COALESCE(SUM(CASE WHEN statut <> 'annulee' THEN total END), 0) AS ca
+           FROM commandes"
+    )->fetch();
+    $cmd = ['total' => (int) $c['total'], 'nouvelles' => (int) $c['nouvelles'], 'ca' => (int) $c['ca']];
+    $nbClients = (int) db()->query('SELECT COUNT(*) FROM clients')->fetchColumn();
+    $dernieresCommandes = db()->query(
+        'SELECT id, reference, nom_client, total, statut, cree_le FROM commandes ORDER BY cree_le DESC, id DESC LIMIT 5'
+    )->fetchAll();
+} catch (Throwable $e) {
+    // tables clients/commandes pas encore créées : on affiche des zéros
+}
+
 $nomsRupture = db()->query(
     "SELECT nom FROM produits WHERE disponibilite = 'rupture' ORDER BY modifie_le DESC LIMIT 2"
 )->fetchAll(PDO::FETCH_COLUMN);
@@ -89,6 +110,26 @@ admin_debut('Tableau de bord', 'dashboard');
   </article>
 </section>
 
+<section class="stats">
+  <article class="stat">
+    <div class="stat-top"><span class="label-caps">Commandes à traiter</span><?= icon('bag', 20) ?></div>
+    <p class="stat-val"><?= $cmd['nouvelles'] ?> <small>nouvelle<?= $pluriel($cmd['nouvelles']) ?></small></p>
+    <p class="stat-note"><a href="commandes.php?statut=nouvelle" class="lien-fleche">Voir les commandes <?= icon('chevron', 14) ?></a></p>
+  </article>
+
+  <article class="stat">
+    <div class="stat-top"><span class="label-caps">Clients</span><?= icon('user', 20) ?></div>
+    <p class="stat-val"><?= $nbClients ?> <small>client<?= $pluriel($nbClients) ?></small></p>
+    <p class="stat-note"><a href="clients.php" class="lien-fleche">Voir les clients <?= icon('chevron', 14) ?></a></p>
+  </article>
+
+  <article class="stat">
+    <div class="stat-top"><span class="label-caps">Chiffre d'affaires</span><?= icon('box', 20) ?></div>
+    <p class="stat-val"><?= e(prix($cmd['ca'])) ?></p>
+    <p class="stat-note"><?= $cmd['total'] ?> commande<?= $pluriel($cmd['total']) ?> (hors annulées)</p>
+  </article>
+</section>
+
 <section class="grille-2">
 
   <?php /* ===== Derniers produits ===== */ ?>
@@ -154,6 +195,31 @@ admin_debut('Tableau de bord', 'dashboard');
 
   <?php /* ===== Colonne de droite ===== */ ?>
   <div class="colonne">
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-titre">Dernières commandes</h2>
+        <a href="commandes.php" class="lien-fleche">Tout voir <?= icon('chevron', 14) ?></a>
+      </div>
+      <?php if (!$dernieresCommandes): ?>
+        <p class="texte-doux">Aucune commande pour l'instant.</p>
+      <?php else: ?>
+        <ul class="liste-prod">
+          <?php foreach ($dernieresCommandes as $o): ?>
+            <li class="row-prod">
+              <div class="row-info">
+                <div class="row-titre">
+                  <span class="row-nom"><?= e($o['nom_client']) ?></span>
+                  <span class="pill"><?= e($libStatut[$o['statut']] ?? $o['statut']) ?></span>
+                </div>
+                <p class="row-meta"><?= e($o['reference']) ?> <span class="sep">&bull;</span> <?= e(prix((int) $o['total'])) ?> <span class="sep">&bull;</span> <?= e(date_fr(strtotime($o['cree_le']))) ?></p>
+              </div>
+              <a href="commandes.php?id=<?= (int) $o['id'] ?>" class="btn-ghost btn-sm">Voir</a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    </div>
 
     <div class="panel">
       <div class="panel-head">

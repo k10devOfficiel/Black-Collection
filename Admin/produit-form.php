@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
                 $allowed = ['jpg', 'jpeg', 'png', 'webp'];
 
-                if (in_array($ext, $allowed)) {
+                if (in_array($ext, $allowed, true) && @getimagesize($tmpName) !== false && $_FILES['photo']['size'] <= 5 * 1024 * 1024) {
                     $dossierUpload = dirname(__DIR__) . '/uploads/produits/';
                     if (!is_dir($dossierUpload)) {
                         mkdir($dossierUpload, 0755, true);
@@ -174,9 +174,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (move_uploaded_file($tmpName, $destination)) {
                         // Enregistrer dans produit_images
                         $cheminBdd = 'uploads/produits/' . $nomFichier;
-                        db()->prepare('UPDATE produit_images SET principale = 0 WHERE produit_id = ?')->execute([$produitId]);
+                        // Anciennes photos du produit (supprimées après l'ajout de la nouvelle)
+                        $stOld = db()->prepare('SELECT id, chemin FROM produit_images WHERE produit_id = ?');
+                        $stOld->execute([$produitId]);
+                        $anciennes = $stOld->fetchAll();
+
                         $stImg = db()->prepare('INSERT INTO produit_images (produit_id, chemin, principale) VALUES (?, ?, 1)');
                         $stImg->execute([$produitId, $cheminBdd]);
+                        $nouvelId = (int) db()->lastInsertId();
+
+                        foreach ($anciennes as $old) {
+                            $fichierOld = dirname(__DIR__) . '/' . $old['chemin'];
+                            if (is_file($fichierOld)) {
+                                @unlink($fichierOld);
+                            }
+                        }
+                        db()->prepare('DELETE FROM produit_images WHERE produit_id = ? AND id <> ?')->execute([$produitId, $nouvelId]);
                     }
                 }
             }

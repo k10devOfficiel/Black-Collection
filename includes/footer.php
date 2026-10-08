@@ -11,10 +11,11 @@ $adresse     = get_param('adresse', 'Abidjan, Côte d\'Ivoire');
 $instagram   = get_param('instagram', '');
 $tiktok      = get_param('tiktok', '');
 $facebook    = get_param('facebook', '');
+$logo        = get_param('logo');
 ?>
   <!-- Tiroir Latéral du Panier (Cart Drawer) -->
   <div class="cart-drawer-overlay" id="cartOverlay"></div>
-  <aside class="cart-drawer" id="cartDrawer" aria-label="Votre sélection">
+  <aside class="cart-drawer" id="cartDrawer" data-step="cart" aria-label="Votre sélection">
     <div class="cart-header">
       <div class="cart-header-title">
         <h3>Votre Sélection</h3>
@@ -23,33 +24,95 @@ $facebook    = get_param('facebook', '');
       <button type="button" class="close-drawer-btn" id="closeCartBtn" aria-label="Fermer le panier">&times;</button>
     </div>
 
-    <!-- Alert minimum de commande -->
-    <div class="cart-notice">
-      <span class="gold-dot">&bull;</span>
-      <span>Minimum requis : <strong><?= $minCommande ?> flacons de parfum</strong> (les vêtements n'ont pas de minimum).</span>
-    </div>
+    <!-- ÉTAPE 1 : panier -->
+    <div class="drawer-step step-cart">
+      <!-- Alert minimum de commande -->
+      <div class="cart-notice">
+        <span class="gold-dot">&bull;</span>
+        <span>Minimum requis : <strong><?= $minCommande ?> flacons de parfum</strong> (les vêtements n'ont pas de minimum).</span>
+      </div>
 
-    <div class="cart-items" id="cartItemsContainer">
-      <!-- Rempli dynamiquement en JS -->
-      <div class="empty-cart-state">
-        <p>Votre sélection est vide.</p>
-        <button type="button" class="btn-outline-gold" onclick="document.getElementById('closeCartBtn').click();">Découvrir le catalogue</button>
+      <div class="cart-items" id="cartItemsContainer">
+        <div class="empty-cart-state">
+          <p>Votre sélection est vide.</p>
+          <button type="button" class="btn-outline-gold" onclick="document.getElementById('closeCartBtn').click();">Découvrir le catalogue</button>
+        </div>
+      </div>
+
+      <div class="cart-footer">
+        <div class="cart-total-row">
+          <span>Sous-total</span>
+          <strong id="cartSubtotal">0 FCFA</strong>
+        </div>
+        <p class="cart-min-warning" id="cartMinWarning"></p>
+        <button type="button" class="btn-wa-order" id="btnCheckout" data-min="<?= $minCommande ?>">
+          Continuer &rarr; mes coordonnées
+        </button>
+        <span class="cart-disclaimer">Paiement à la livraison ou par Wave à la confirmation.</span>
       </div>
     </div>
 
-    <div class="cart-footer">
-      <div class="cart-total-row">
-        <span>Sous-total</span>
-        <strong id="cartSubtotal">0 FCFA</strong>
+    <!-- ÉTAPE 2 : coordonnées client -->
+    <div class="drawer-step step-checkout">
+      <form id="checkoutForm" class="checkout-form" novalidate autocomplete="on">
+        <button type="button" class="back-link" id="btnBackToCart">&larr; Retour à ma sélection</button>
+        <h4 class="checkout-title">Vos coordonnées</h4>
+        <p class="checkout-sub">Pour que nous puissions vous livrer et vous recontacter.</p>
+
+        <div class="checkout-errors" id="checkoutErrors" role="alert" hidden></div>
+
+        <div class="field">
+          <label for="f_nom">Nom &amp; prénoms *</label>
+          <input type="text" id="f_nom" name="nom" maxlength="150" autocomplete="name" placeholder="Ex : Kouassi Aya Marie">
+          <span class="field-error" data-for="nom"></span>
+        </div>
+
+        <div class="field">
+          <label for="f_tel">Numéro de contact (WhatsApp de préférence) *</label>
+          <input type="tel" id="f_tel" name="telephone" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="Ex : 05 54 97 15 92">
+          <span class="field-error" data-for="telephone"></span>
+        </div>
+
+        <div class="field">
+          <label for="f_adresse">Lieu de livraison (<?= e($zone) ?>) *</label>
+          <input type="text" id="f_adresse" name="adresse" maxlength="255" autocomplete="street-address" placeholder="Commune, quartier, point de repère">
+          <span class="field-error" data-for="adresse"></span>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Paiement souhaité *</span>
+          <div class="pay-options">
+            <label class="pay-opt"><input type="radio" name="paiement" value="wave"><span>Wave</span></label>
+            <label class="pay-opt"><input type="radio" name="paiement" value="especes"><span>Espèces à la livraison</span></label>
+          </div>
+          <span class="field-error" data-for="paiement"></span>
+        </div>
+
+        <div class="field">
+          <label for="f_note">Note (facultatif)</label>
+          <textarea id="f_note" name="note" rows="2" maxlength="500" placeholder="Horaire souhaité, précision d'adresse..."></textarea>
+        </div>
+
+        <!-- Champ piège anti-robots : doit rester vide -->
+        <div class="hp-field" aria-hidden="true">
+          <label>Ne pas remplir <input type="text" name="site_web" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="checkout-total"><span>Total</span><strong id="checkoutTotal">0 FCFA</strong></div>
+        <button type="submit" class="btn-wa-order" id="btnSendOrder">Envoyer ma commande</button>
+      </form>
+    </div>
+
+    <!-- ÉTAPE 3 : confirmation -->
+    <div class="drawer-step step-done">
+      <div class="done-box">
+        <div class="done-check">&#10003;</div>
+        <h4>Commande enregistrée</h4>
+        <p>Référence : <strong id="successRef">-</strong></p>
+        <p class="done-hint">WhatsApp s'est ouvert avec votre commande. Si ce n'est pas le cas, utilisez le bouton ci-dessous, puis envoyez le message pour la valider.</p>
+        <a class="btn-wa-order" id="waSendLink" href="#" target="_blank" rel="noopener">Ouvrir WhatsApp</a>
+        <button type="button" class="btn-outline-gold" id="btnCloseSuccess">Fermer</button>
       </div>
-      <p class="cart-min-warning" id="cartMinWarning">Il vous manque encore des flacons de parfum pour atteindre le minimum requis.</p>
-      <button type="button" class="btn-wa-order" id="btnWhatsappOrder" data-wa="<?= e($whatsapp) ?>" data-min="<?= $minCommande ?>">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24M8.53 7.33c-.16 0-.42.06-.64.3-.22.25-.85.83-.85 2.02s.87 2.34 1 2.5c.12.16 1.71 2.61 4.14 3.66.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.47-.28-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.16.25-.64.81-.79.97-.14.16-.29.18-.54.06s-1.05-.39-2-1.23c-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.09-.16.04-.31-.02-.43-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48z"/>
-        </svg>
-        Commander sur WhatsApp
-      </button>
-      <span class="cart-disclaimer">Paiement à la livraison ou par Wave à la confirmation.</span>
     </div>
   </aside>
 
@@ -68,7 +131,11 @@ $facebook    = get_param('facebook', '');
     <div class="container footer-grid">
       <!-- Colonne 1: Marque -->
       <div class="footer-col brand-col">
-        <h4 class="footer-logo"><?= e($nomMarque) ?></h4>
+        <?php if ($logo !== ''): ?>
+          <img class="footer-logo-img" src="<?= e($logo) ?>" alt="<?= e($nomMarque) ?>">
+        <?php else: ?>
+          <h4 class="footer-logo"><?= e($nomMarque) ?></h4>
+        <?php endif; ?>
         <p class="footer-slogan"><?= e($slogan) ?></p>
         <p class="footer-desc">Une sélection d'essences intenses et de pièces raffinées, conçues pour affirmer une présence inoubliable.</p>
         <?php if ($instagram || $tiktok || $facebook): ?>
@@ -113,7 +180,7 @@ $facebook    = get_param('facebook', '');
 
     <div class="footer-bottom container">
       <p>&copy; <?= date('Y') ?> <?= e($nomMarque) ?>. Tous droits réservés.</p>
-      <a class="admin-link">devéloppeur k10dev</a>
+      <span class="admin-link">Développé par k10dev</span>
     </div>
   </footer>
 

@@ -36,7 +36,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 set_param($cle, $val);
             }
         }
-        $succes = 'Paramètres enregistrés avec succès.';
+
+        // --- Logo de la boutique (lu directement en base : get_param() garde un cache) ---
+        $stLogo = db()->prepare('SELECT valeur FROM parametres WHERE cle = ?');
+        $stLogo->execute(['logo']);
+        $logoActuel = (string) $stLogo->fetchColumn();
+        $effacerAncien = function () use (&$logoActuel): void {
+            if ($logoActuel !== '') {
+                $ancien = dirname(__DIR__) . '/' . $logoActuel;
+                if (is_file($ancien)) {
+                    @unlink($ancien);
+                }
+            }
+        };
+
+        if (!empty($_POST['supprimer_logo'])) {
+            $effacerAncien();
+            set_param('logo', '');
+        } elseif (!empty($_FILES['logo']['name'])) {
+            $f = $_FILES['logo'];
+            $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+            if ($f['error'] !== UPLOAD_ERR_OK) {
+                $erreur = 'Le téléversement du logo a échoué (fichier trop lourd ?).';
+            } elseif (!in_array($ext, ['png', 'jpg', 'jpeg', 'webp'], true) || @getimagesize($f['tmp_name']) === false) {
+                $erreur = 'Logo refusé : utilisez une vraie image PNG, JPG ou WEBP.';
+            } elseif ($f['size'] > 2 * 1024 * 1024) {
+                $erreur = 'Logo trop lourd : 2 Mo maximum.';
+            } else {
+                $dossier = dirname(__DIR__) . '/uploads/logo/';
+                if (!is_dir($dossier)) {
+                    mkdir($dossier, 0755, true);
+                }
+                $nomFichier = 'logo_' . time() . '.' . $ext;
+                if (move_uploaded_file($f['tmp_name'], $dossier . $nomFichier)) {
+                    $effacerAncien();
+                    set_param('logo', 'uploads/logo/' . $nomFichier);
+                } else {
+                    $erreur = 'Impossible d\'enregistrer le logo sur le serveur.';
+                }
+            }
+        }
+
+        if ($erreur === '') {
+            $succes = 'Paramètres enregistrés avec succès.';
+        }
     }
 }
 
@@ -45,6 +88,7 @@ $params = [];
 foreach ($cles as $cle) {
     $params[$cle] = get_param($cle);
 }
+$logo = get_param('logo');
 
 admin_debut('Paramètres', 'parametres');
 ?>
@@ -65,7 +109,7 @@ admin_debut('Paramètres', 'parametres');
   <div class="msg-error"><?= e($erreur) ?></div>
 <?php endif; ?>
 
-<form method="post" class="panel">
+<form method="post" enctype="multipart/form-data" class="panel">
   <?= csrf_champ() ?>
 
   <div class="form-grid">
@@ -73,6 +117,21 @@ admin_debut('Paramètres', 'parametres');
     <div class="form-group full" style="border-bottom: 1px solid var(--line-soft); padding-bottom: 12px; margin-bottom: 24px;">
       <h3 style="font-family: var(--serif); font-size: 20px; color: var(--white); margin: 0 0 6px;">Identité & Marque</h3>
       <span class="muted" style="font-size: 13px;">Appellation officielle et devise affichée sur la vitrine</span>
+    </div>
+
+    <div class="form-group full">
+      <label class="form-label" for="logo">Logo de la boutique</label>
+      <?php if ($logo !== ''): ?>
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+          <img src="../<?= e($logo) ?>" alt="Logo actuel" style="max-height: 64px; max-width: 220px; object-fit: contain; background: #0c1419; border: 1px solid var(--line); padding: 8px;">
+          <label class="form-check">
+            <input type="checkbox" name="supprimer_logo" value="1">
+            <span>Supprimer le logo (revenir au nom de la marque)</span>
+          </label>
+        </div>
+      <?php endif; ?>
+      <input type="file" id="logo" name="logo" class="form-control" accept="image/png,image/jpeg,image/webp">
+      <div class="form-hint">PNG, JPG ou WEBP, 2 Mo maximum. Idéal : PNG à fond transparent, en couleurs claires (le site est sombre). Affiché sur la boutique, la page de connexion et le tableau de bord.</div>
     </div>
 
     <div class="form-group">

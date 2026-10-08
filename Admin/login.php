@@ -66,7 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="auth-page">
   <main class="auth-card">
-    <div class="logo">BLACK COLLECTION</div>
+    <?php $logo = get_param('logo'); ?>
+    <?php if ($logo !== ''): ?>
+      <img class="auth-logo-img" src="../<?= e($logo) ?>" alt="Black Collection">
+    <?php else: ?>
+      <div class="logo">BLACK COLLECTION</div>
+    <?php endif; ?>
     <h1>Espace administrateur</h1>
 
     <?php if ($info): ?><div class="info"><p><?= e($info) ?></p></div><?php endif; ?>

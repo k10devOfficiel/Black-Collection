@@ -29,10 +29,10 @@ function db(): PDO
 
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
-            // En cas d'erreur de connexion
+            } catch (PDOException $e) {
             http_response_code(500);
-            die('Erreur de connexion à la base de données : ' . e($e->getMessage()));
+            error_log('Erreur BDD : ' . $e->getMessage());
+            die('Le site est momentanément indisponible. Merci de réessayer dans quelques minutes.');
         }
     }
 
