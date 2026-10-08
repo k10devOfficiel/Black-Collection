@@ -12,11 +12,11 @@ $enLocal = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', ':
 
 // Paramètres de connexion MySQL (production : infinityfree)
 
-define('DB_HOST', $enLocal ? '127.0.0.1' : 'sql105.infinityfree.com');
+define('DB_HOST', $enLocal ? '127.0.0.1' : 'sql209.infinityfree.com');
 define('DB_PORT', '3306');
-define('DB_NAME', $enLocal ? 'black_collection' : 'if0_43110371_BACKLCOLLECTION');
-define('DB_USER', $enLocal ? 'root' : 'if0_43110371');
-define('DB_PASS', $enLocal ? '' : '4hIh7qlVUF0QJ');
+define('DB_NAME', $enLocal ? 'black_collection' : 'if0_43123163_BCL');
+define('DB_USER', $enLocal ? 'root' : 'if0_43123163');
+define('DB_PASS', $enLocal ? '' : 'FVrBkKioiNAUGOQ');
 define('DB_CHARSET', 'utf8mb4');
 
 // Sécurité pour la création du compte administrateur
